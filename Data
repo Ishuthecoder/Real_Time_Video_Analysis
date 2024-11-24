@@ -1,0 +1,7 @@
+faceProto = r"C:\Users\dubey\Downloads\opencv_face_detector.pbtxt"
+faceModel = r"C:\Users\dubey\Downloads\opencv_face_detector_uint8.pb"
+ageProto = r"C:\Users\dubey\Downloads\age_deploy (1).prototxt"
+ageModel = r"C:\Users\dubey\Downloads\age_net (1).caffemodel"
+genderProto = r"C:\Users\dubey\Downloads\gender_deploy (2).prototxt"
+genderModel = r"C:\Users\dubey\Downloads\gender_net (2).caffemodel"
+Emotion_prediction="C:\Users\dubey\Downloads\facial_expression_model_combined.h5"
