@@ -1,0 +1,154 @@
+import cv2
+import face_recognition
+import numpy as np
+from keras.models import load_model
+from keras.preprocessing import image
+
+# Load models
+face_exp_model = load_model(r"C:\Users\dubey\Downloads\facial_expression_model_combined.h5")
+faceProto = r"C:\Users\dubey\Downloads\opencv_face_detector.pbtxt"
+faceModel = r"C:\Users\dubey\Downloads\opencv_face_detector_uint8.pb"
+ageProto = r"C:\Users\dubey\Downloads\age_deploy (1).prototxt"
+ageModel = r"C:\Users\dubey\Downloads\age_net (1).caffemodel"
+genderProto = r"C:\Users\dubey\Downloads\gender_deploy (2).prototxt"
+genderModel = r"C:\Users\dubey\Downloads\gender_net (2).caffemodel"
+
+# Load networks
+faceNet = cv2.dnn.readNet(faceModel, faceProto)
+ageNet = cv2.dnn.readNet(ageModel, ageProto)
+genderNet = cv2.dnn.readNet(genderModel, genderProto)
+
+# Constants
+Model_Mean_Values = (78.4263377603, 87.7689143744, 114.895847746)
+ageList = ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
+genderList = ['Male', 'Female']
+emotions_label = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
+
+# Load and encode images for face recognition
+image_paths = [
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Aditya Dubey.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Aftab Sir.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Bhavna Rathore.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Dhanajay Bisen.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Gaurav Khare.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Geetam Shukla.png",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Kaushal Sir.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Murli Manohar.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Namita Arya.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Nookla Venu.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Poonam Singh.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Praveen Bansal.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Priyanka Garg.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Saurabh Rajput.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Vinay Gupta.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Rajnish\WhatsApp Image 2024-10-25 at 11.45.51_31043617.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Rajnish\WhatsApp Image 2024-10-25 at 12.59.49_0cea6de6.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Ishika\WhatsApp Image 2024-10-25 at 12.48.02_2d00d9b7.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\Camera Roll\WIN_20241118_21_16_35_Pro.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\Camera Roll\WIN_20241118_21_16_40_Pro.jpg"
+    
+]
+image_names = [
+    "Aditya Dubey", "Aftab Ahmed", "Bhavna Rathore", "Dhanajay Bisen",
+    "Gaurav Khare", "Geetam Shukla", "Kaushal Pratap", "Murli Manohar",
+    "Namita Arya", "Nookla Venu", "Poonam Singh", "Praveen Bansal",
+    "Priyanka Garg", "Saurabh Rajput", "Vinay Gupta", "Rajnish Kumar Sharma" ,"Rajnish Kumar Sharma" ,"Ishika Dubey","Ishika Dubey" , "Ishika Dubey"
+    
+]
+known_face_encodings = []
+known_face_names = []
+
+for path, name in zip(image_paths, image_names):
+    try:
+        img = face_recognition.load_image_file(path)
+        img_encoding = face_recognition.face_encodings(img)[0]
+        known_face_encodings.append(img_encoding)
+        known_face_names.append(name)
+    except IndexError:
+        print(f"Could not find a face in {path}. Skipping.")
+
+# Video capture
+video_stream = cv2.VideoCapture(0)
+
+def faceBox(faceNet, frame, padding=20):
+    frameHeight = frame.shape[0]
+    frameWidth = frame.shape[1]
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (227, 227), [104, 117, 123], swapRB=False)
+    faceNet.setInput(blob)
+    detection = faceNet.forward()
+    bboxs = []
+    for i in range(detection.shape[2]):
+        confidence = detection[0, 0, i, 2]
+        if confidence > 0.7:
+            x1 = max(0, int(detection[0, 0, i, 3] * frameWidth) - padding)
+            y1 = max(0, int(detection[0, 0, i, 4] * frameHeight) - padding)
+            x2 = min(frameWidth, int(detection[0, 0, i, 5] * frameWidth) + padding)
+            y2 = min(frameHeight, int(detection[0, 0, i, 6] * frameHeight) + padding)
+            bboxs.append([x1, y1, x2, y2])
+    return bboxs
+
+while True:
+    ret, current_frame = video_stream.read()
+    if not ret:
+        break
+
+    bboxs = faceBox(faceNet, current_frame)
+
+    for bbox in bboxs:
+        x1, y1, x2, y2 = bbox
+        face = current_frame[y1:y2, x1:x2]
+
+        # Try to compute face encodings using face_recognition
+        rgb_face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        face_encodings = face_recognition.face_encodings(rgb_face)
+
+        if len(face_encodings) > 0:
+            face_encoding = face_encodings[0]
+
+            # Compare the face with known faces
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.5)
+            name_of_person = "Unknown face"
+
+            if True in matches:
+                first_match_index = matches.index(True)
+                name_of_person = known_face_names[first_match_index]
+
+            # Predict gender
+            blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), Model_Mean_Values, swapRB=False)
+            genderNet.setInput(blob)
+            genderPred = genderNet.forward()
+            gender = genderList[genderPred[0].argmax()]
+
+            # Predict age
+            ageNet.setInput(blob)
+            agePred = ageNet.forward()
+            age = ageList[agePred[0].argmax()]
+
+            # Predict emotion
+            try:
+                gray_face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+                gray_face = cv2.resize(gray_face, (48, 48))
+                img_pixels = image.img_to_array(gray_face)
+                img_pixels = np.expand_dims(img_pixels, axis=0)
+                exp_predictions = face_exp_model.predict(img_pixels)
+                emotion_label = emotions_label[np.argmax(exp_predictions[0])]
+            except:
+                emotion_label = "Unknown"
+
+            # Display details inside the bounding box
+            label = f"{name_of_person}, {gender}, {age}, {emotion_label}"
+            label_y_position = y1 + 20  # Start text inside the rectangle
+            for i, line in enumerate(label.split(", ")):
+                cv2.putText(current_frame, line.strip(), (x1 + 5, label_y_position + i * 15),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
+        # Draw bounding box
+        cv2.rectangle(current_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+    cv2.imshow("Live Video", current_frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+video_stream.release()
+cv2.destroyAllWindows()
