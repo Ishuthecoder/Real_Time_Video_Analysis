@@ -1,0 +1,89 @@
+import cv2
+import face_recognition
+
+# Get the video capture
+video_stream = cv2.VideoCapture(0)
+
+# Define paths and names for the 16 images
+image_paths = [
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Aditya Dubey.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Aftab Sir.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Bhavna Rathore.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Dhanajay Bisen.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Gaurav Khare.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Geetam Shukla.png",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Kaushal Sir.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Murli Manohar.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Namita Arya.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Nookla Venu.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Poonam Singh.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Praveen Bansal.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Priyanka Garg.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Saurabh Rajput.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Faculties\Vinay Gupta.jpeg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Rajnish\WhatsApp Image 2024-10-25 at 11.45.51_31043617.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Rajnish\WhatsApp Image 2024-10-25 at 12.59.49_0cea6de6.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\MITS Students\Ishika\WhatsApp Image 2024-10-25 at 12.48.02_2d00d9b7.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\Camera Roll\WIN_20241118_21_16_35_Pro.jpg",
+    r"C:\Users\dubey\OneDrive\Pictures\Camera Roll\WIN_20241118_21_16_40_Pro.jpg"
+]
+
+image_names = [
+    "Aditya Dubey", "Aftab Ahmed", "Bhavna Rathore", "Dhanajay Bisen",
+    "Gaurav Khare", "Geetam Shukla", "Kaushal Pratap", "Murli Manohar",
+    "Namita Arya", "Nookla Venu", "Poonam Singh", "Praveen Bansal",
+    "Priyanka Garg", "Saurabh Rajput", "Vinay Gupta", "Rajnish Kumar Sharma" ,"Rajnish Kumar Sharma" ,"Ishika Dubey","Ishika Dubey" , "Ishika Dubey"
+]
+
+# Load and encode images
+known_face_encodings = []
+known_face_names = []
+
+for path, name in zip(image_paths, image_names):
+    try:
+        image = face_recognition.load_image_file(path)
+        image_encoding = face_recognition.face_encodings(image)[0]  # Assuming one face per image
+        known_face_encodings.append(image_encoding)
+        known_face_names.append(name)
+    except IndexError:
+        print(f"Could not find a face in {path}. Skipping.")
+
+# Set frame processing interval
+frame_count = 0
+process_every_n_frames = 10
+
+while True:
+    ret, current_frame = video_stream.read()
+    if not ret:
+        break
+
+    frame_count += 1
+    if frame_count % process_every_n_frames != 0:
+        continue
+
+    # Resize the current frame for faster processing
+    current_frame_small = cv2.resize(current_frame, (0, 0), fx=0.2, fy=0.2)
+
+    # Detect faces and encodings in the resized frame
+    all_face_locations = face_recognition.face_locations(current_frame_small, model='hog')
+    all_face_encodings = face_recognition.face_encodings(current_frame_small, all_face_locations)
+
+    for current_face_location, current_face_encoding in zip(all_face_locations, all_face_encodings):
+        top, right, bottom, left = current_face_location
+        top, right, bottom, left = top * 5, right * 5, bottom * 5, left * 5  # Adjust to match original size
+
+        all_matches = face_recognition.compare_faces(known_face_encodings, current_face_encoding, tolerance=0.4)
+        name_of_person = 'Unknown face'
+        if True in all_matches:
+            first_match_index = all_matches.index(True)
+            name_of_person = known_face_names[first_match_index]
+
+        cv2.rectangle(current_frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        cv2.putText(current_frame, name_of_person, (left, bottom), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
+
+    cv2.imshow('web camera', current_frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+video_stream.release()
+cv2.destroyAllWindows()
