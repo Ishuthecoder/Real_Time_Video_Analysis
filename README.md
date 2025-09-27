@@ -12,14 +12,19 @@ The **Face Recognition and Detection System** is an AI-powered application that 
 - **Real-time Processing:** Works on live video feeds using OpenCV and a webcam.
 
 ## 🛠️ Tech Stack
-- **Programming Language:** Python
-- **Libraries & Frameworks:**
-  - OpenCV (for image processing)
-  - Dlib/FaceNet (for face recognition)
-  - DeepFace (for age, gender, and emotion prediction)
-  - TensorFlow/Keras (for deep learning models)
-  - NumPy & Pandas (for data handling)
-  - Flask (for web interface, if needed)
+
+**Programming Language:**  
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)  
+
+**Libraries & Frameworks:**  
+![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)  
+![Dlib](https://img.shields.io/badge/Dlib-5C2D91?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABd0lEQVRYhe2XMWrCQBSEv2GBOUJAiHoxUYiL0DRMS3A0EQHqCSU5iZ0hLOZEoUKs1j6/8uRMCjz9X7Hw/3qBnHIgGmJqM77Hiq2Eaj1gCLYfYFAx0KxWHjx1VGwgKaQXy5xS3WBK1Uqv7X1k5wggAiAKJ+uHk3zzAbw+X2aW9mRBhZCqrcHhwRDIuwgSVXW9Tx4x5W9IAJe+Pf9OZZz/5bM0JHcCUxGjh/95FglFYpR1SkfL1fT+UgVwqFppjU8M3l+f+mJknhJvU+fJXxM2/Y1rL+nZVgfp62f0xeKZPFPkXhzlH92AEk1mX+1mCzIq+H6M0k5i8iM/BMwE+7/L/TN+T2Mr4AJC1k7YUhKALvU4LQeH4r5aTVjF3sS6BaZoj7VQ1uM6EAAAAASUVORK5CYII=)  
+![FaceNet](https://img.shields.io/badge/FaceNet-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)  
+![DeepFace](https://img.shields.io/badge/DeepFace-007ACC?style=for-the-badge&logo=python&logoColor=white)  
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)  
+![Keras](https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=keras&logoColor=white)  
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)  
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)  
 
 ## 📂 Project Structure
 ```
